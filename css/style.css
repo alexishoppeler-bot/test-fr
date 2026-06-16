@@ -148,8 +148,9 @@ body {
 }
 .opt-radio:hover { border-color: var(--accent2); background: var(--bg2); }
 .opt-radio.sel   { border-color: var(--accent2); background: rgba(124,58,237,.08); box-shadow: 0 0 0 3px rgba(124,58,237,.12); }
-.opt-jnsp { border-style: dashed; color: var(--text3); font-style: italic; font-weight: 600; }
-.opt-jnsp.sel { border-color: var(--text3); background: var(--bg2); color: var(--text2); font-style: normal; }
+.opt-jnsp { border-color: #e2daf8; background: #faf8ff; color: #9090b0; font-style: normal; font-size: .88rem; margin-top: 4px; }
+.opt-jnsp:hover { border-color: #a78bfa !important; background: #f3efff !important; color: var(--text2) !important; }
+.opt-jnsp.sel { border-color: #a78bfa; background: #ede9fe; color: var(--text2); }
 .opt-radio input[type=radio] { accent-color:var(--accent2); width:17px; height:17px; flex-shrink:0 }
 
 /* ── QCM MULTIPLE (carrés) ── */
