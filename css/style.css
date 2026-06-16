@@ -387,3 +387,134 @@ h3 {
 ::-webkit-scrollbar { width:6px }
 ::-webkit-scrollbar-track { background:var(--bg2) }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px }
+
+/* ══ ANIMATIONS AVANCÉES ══ */
+
+/* Entrée des écrans */
+.ecran.actif { animation: screen-in .38s cubic-bezier(.22,1,.36,1) both; }
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Transitions entre questions */
+@keyframes q-slide-out {
+  to { opacity: 0; transform: translateX(-44px) scale(.96); }
+}
+@keyframes q-slide-in {
+  from { opacity: 0; transform: translateX(44px) scale(.96); }
+  to   { opacity: 1; transform: none; }
+}
+.q-out { animation: q-slide-out .22s cubic-bezier(.4,0,1,1) forwards; }
+.q-in  { animation: q-slide-in  .34s cubic-bezier(.22,1,.36,1) both; }
+
+/* Entrée des options (stagger via --opt-i) */
+@keyframes opt-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: none; }
+}
+.opt-radio, .opt-check {
+  animation: opt-in .28s ease both;
+  animation-delay: calc(var(--opt-i, 0) * 60ms);
+}
+.vf-btn {
+  animation: opt-in .3s ease both;
+  animation-delay: calc(var(--opt-i, 0) * 90ms);
+}
+.mot-chip {
+  animation: opt-in .22s ease both;
+  animation-delay: calc(var(--opt-i, 0) * 38ms);
+}
+.audio-bloc {
+  animation: opt-in .36s ease both;
+  animation-delay: .06s;
+}
+
+/* Sélection améliorée */
+.opt-radio, .opt-check {
+  transition: border-color .15s, background .15s, box-shadow .15s,
+              transform .18s cubic-bezier(.34,1.56,.64,1);
+}
+.opt-radio.sel { transform: scale(1.016); }
+.opt-check.sel { transform: scale(1.016); }
+.vf-btn        { transition: all .2s cubic-bezier(.34,1.56,.64,1); }
+.vf-btn:hover  { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(124,58,237,.22); }
+.vf-btn.sel    { transform: scale(1.06); box-shadow: 0 8px 24px rgba(124,58,237,.32); }
+
+/* Shimmer barre de progression */
+.prog-wrap { overflow: hidden; }
+.prog-bar  { position: relative; overflow: hidden; }
+.prog-bar::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.55) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: prog-shimmer 2.4s ease-in-out infinite;
+}
+@keyframes prog-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+/* Reflet lumineux bouton principal */
+.btn-grad { position: relative; overflow: hidden; }
+.btn-grad::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255,255,255,.22) 50%,
+    transparent 70%
+  );
+  transform: translateX(-150%);
+  animation: btn-shine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes btn-shine {
+  0%   { transform: translateX(-150%); }
+  18%  { transform: translateX(150%); }
+  100% { transform: translateX(150%); }
+}
+.btn-grad:hover {
+  box-shadow: 0 16px 44px rgba(124,58,237,.48);
+  transform: translateY(-3px);
+}
+
+/* Badge résultat pop */
+@keyframes badge-pop {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  55%  { transform: scale(1.22) rotate(5deg);  opacity: 1; }
+  75%  { transform: scale(0.93) rotate(-2deg); }
+  90%  { transform: scale(1.05) rotate(1deg);  }
+  100% { transform: scale(1)    rotate(0);     }
+}
+.res-badge {
+  animation: badge-pop .75s cubic-bezier(.34,1.56,.64,1) both;
+  animation-delay: .12s;
+}
+
+/* Résultats : entrée progressive */
+@keyframes res-item-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+.res-titre { animation: res-item-in .42s ease both; animation-delay: .36s; }
+.res-score { animation: res-item-in .42s ease both; animation-delay: .52s; }
+.res-desc  { animation: res-item-in .42s ease both; animation-delay: .68s; }
+
+/* Chips drag & drop */
+.mot-chip {
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1),
+              box-shadow .18s ease, background .15s, border-color .15s;
+}
+.mot-chip:hover:not(:active) {
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 8px 20px rgba(124,58,237,.32);
+}
+.mot-chip.dans-zone:hover { transform: scale(1.04); }
+
+/* Instruction bar accent */
+.instr { border-left-width: 4px; }

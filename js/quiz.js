@@ -78,7 +78,7 @@ function affQuestion() {
       html += `<span class="q-label">${q.q}</span><div class="opts-radio">`;
       q.opts.forEach((o, i) => {
         const cls = (o === "Je ne sais pas") ? "opt-radio opt-jnsp" : "opt-radio";
-        html += `<label class="${cls}" id="opt${i}">
+        html += `<label class="${cls}" id="opt${i}" style="--opt-i:${i}">
           <input type="radio" name="qcm" value="${o}" onchange="selRadio(${i})"> ${o}
         </label>`;
       });
@@ -90,7 +90,7 @@ function affQuestion() {
         <p class="note-saisie">Plusieurs réponses possibles.</p>
         <div class="opts-check">`;
       q.opts.forEach((o, i) =>
-        html += `<label class="opt-check" id="opt${i}">
+        html += `<label class="opt-check" id="opt${i}" style="--opt-i:${i}">
           <input type="checkbox" value="${o}" onchange="selCheck(${i},this)"> ${o}
         </label>`
       );
@@ -100,8 +100,8 @@ function affQuestion() {
     case "vf":
       html += `<span class="q-label">${q.q}</span>
         <div class="vf-grp">
-          <button class="vf-btn" id="vf_Vrai" onclick="selVF('Vrai')">Vrai</button>
-          <button class="vf-btn" id="vf_Faux" onclick="selVF('Faux')">Faux</button>
+          <button class="vf-btn" id="vf_Vrai" onclick="selVF('Vrai')" style="--opt-i:0">Vrai</button>
+          <button class="vf-btn" id="vf_Faux" onclick="selVF('Faux')" style="--opt-i:1">Faux</button>
         </div>`;
       break;
 
@@ -133,8 +133,8 @@ function affQuestion() {
         <div class="demele-mots-dispo" id="dm-dispo"
           ondragover="event.preventDefault()"
           ondrop="dropInDispo(event)">
-        ${melange.map(m =>
-          `<span class="mot-chip" draggable="true"
+        ${melange.map((m, idx) =>
+          `<span class="mot-chip" draggable="true" style="--opt-i:${idx}"
             ondragstart="dragStart(event,'${m}')"
             ondragend="dragEnd(event)">${m}</span>`
         ).join("")}
@@ -149,6 +149,10 @@ function affQuestion() {
   }
 
   zone.innerHTML = html;
+
+  zone.classList.remove("q-in");
+  void zone.offsetWidth;
+  zone.classList.add("q-in");
 }
 
 /* ── DRAG & DROP ── */
@@ -272,13 +276,22 @@ function suivant() {
     correct: ok
   });
 
-  qIdx++;
-  if (qIdx < TOTAL) {
-    affQuestion();
-    window.scrollTo(0, 0);
-  } else {
-    affResultat();
-  }
+  const btn  = document.getElementById("btn-suiv");
+  const card = document.getElementById("zone-q");
+  if (btn) btn.disabled = true;
+  card.classList.remove("q-in");
+  card.classList.add("q-out");
+  setTimeout(() => {
+    card.classList.remove("q-out");
+    qIdx++;
+    if (qIdx < TOTAL) {
+      if (btn) btn.disabled = false;
+      affQuestion();
+      window.scrollTo(0, 0);
+    } else {
+      affResultat();
+    }
+  }, 230);
 }
 
 /* ── ÉCHELLE DE NOTATION ──
