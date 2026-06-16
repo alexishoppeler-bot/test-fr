@@ -104,7 +104,7 @@ function affQuestion() {
       break;
 
     case "vf":
-      html += `<span class="q-label">${q.q}</span>
+      html += `<span class="q-label">${fmtQ(q.q)}</span>
         <div class="vf-grp">
           <button class="vf-btn" id="vf_Vrai" onclick="selVF('Vrai')" style="--opt-i:0">Vrai</button>
           <button class="vf-btn" id="vf_Faux" onclick="selVF('Faux')" style="--opt-i:1">Faux</button>
@@ -151,7 +151,7 @@ function affQuestion() {
       break;
 
     case "libre":
-      html += `<p style="font-size:.96rem;margin-bottom:10px">${q.q}</p>
+      html += `<p style="font-size:.96rem;margin-bottom:10px">${fmtQ(q.q)}</p>
         <input class="inp-libre" type="text" id="libre-inp" placeholder="Votre réponse…">
         <p class="note-saisie">Respectez les accents et la casse.</p>`;
       break;
