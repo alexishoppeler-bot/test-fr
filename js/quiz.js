@@ -562,23 +562,152 @@ function envoyerEmailConfirm() {
 function telechargerImage() {
   if (!_lastEmailParams) return;
   const p = _lastEmailParams;
-  const nom = (p.prenom + "_" + p.nom).replace(/\s+/g,"_");
-  const filename = `résultats_${nom}_${p.niveau}.png`;
-  const wrap = document.getElementById("btn-results-wrap");
-  const msg  = document.getElementById("save-msg");
-  if (wrap) wrap.style.visibility = "hidden";
-  if (msg)  msg.style.visibility  = "hidden";
-  html2canvas(document.getElementById("e-res"), { scale: 2, useCORS: true, backgroundColor: "#f5f3ff" })
-    .then(canvas => {
-      const a = document.createElement("a");
-      a.href = canvas.toDataURL("image/png");
-      a.download = filename;
-      a.click();
-    })
-    .finally(() => {
-      if (wrap) wrap.style.visibility = "";
-      if (msg)  msg.style.visibility  = "";
-    });
+
+  const outer = document.createElement("div");
+  outer.style.cssText = "position:fixed;left:-9999px;top:0;z-index:0;pointer-events:none;";
+  outer.innerHTML = _buildImageCard(p);
+  document.body.appendChild(outer);
+  const card = outer.firstElementChild;
+
+  const btn = [...document.querySelectorAll("button")].find(b => b.textContent.includes("Télécharger"));
+  if (btn) { btn.disabled = true; btn.textContent = "Génération…"; }
+
+  setTimeout(() => {
+    html2canvas(card, { scale: 3, useCORS: true, allowTaint: false, backgroundColor: "#f5f3ff", logging: false })
+      .then(canvas => {
+        const nom = (p.prenom + "_" + p.nom).replace(/\s+/g, "_");
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = `résultats_${nom}_${p.niveau}.png`;
+        a.click();
+      })
+      .catch(() => alert("Erreur lors de la génération de l'image."))
+      .finally(() => {
+        document.body.removeChild(outer);
+        if (btn) { btn.disabled = false; btn.textContent = "⬇ Télécharger l'image"; }
+      });
+  }, 400);
+}
+
+function _buildImageCard(p) {
+  const F = "font-family:'Nunito','Helvetica Neue',Arial,sans-serif;";
+  const GRAD = "linear-gradient(135deg,#1e3a8a 0%,#1D4ED8 45%,#7C3AED 100%)";
+
+  const cp = parseInt(p.comp_grammaire)   || 0;
+  const cc = parseInt(p.comp_conjugaison) || 0;
+  const co = parseInt(p.comp_oral)        || 0;
+  const ce = parseInt(p.comp_ecrit)       || 0;
+  const cv = parseInt(p.comp_vocabulaire) || 0;
+  const na = parseInt(p.niv_prea1) || 0;
+  const n1 = parseInt(p.niv_a1)   || 0;
+  const n2 = parseInt(p.niv_a2)   || 0;
+  const nb = parseInt(p.niv_b1)   || 0;
+  const nc = parseInt(p.niv_b2)   || 0;
+  const nd = parseInt(p.niv_c1)   || 0;
+
+  function compBar(label, icon, val, color) {
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+      <div style="${F}width:140px;font-size:12px;font-weight:700;color:#4a4a6a;">${icon} ${label}</div>
+      <div style="flex:1;min-width:0;height:9px;background:#ede9fe;border-radius:99px;overflow:hidden;">
+        <div style="height:100%;width:${val}%;background:${color};border-radius:99px;"></div>
+      </div>
+      <div style="${F}width:34px;text-align:right;font-size:12px;font-weight:800;color:${color};">${val}%</div>
+    </div>`;
+  }
+
+  function nivBar(label, val, color) {
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="${F}width:44px;font-size:11px;font-weight:700;color:#4a4a6a;">${label}</div>
+      <div style="flex:1;min-width:0;height:8px;background:#ede9fe;border-radius:99px;overflow:hidden;">
+        <div style="height:100%;width:${val}%;background:${color};border-radius:99px;"></div>
+      </div>
+      <div style="${F}width:34px;text-align:right;font-size:11px;font-weight:800;color:${color};">${val}%</div>
+    </div>`;
+  }
+
+  const scoreBar = Math.min(parseInt(p.score) || 0, 100);
+
+  return `<div style="${F}width:800px;background:#f5f3ff;overflow:hidden;">
+
+    <div style="background:${GRAD};padding:34px 48px;text-align:center;">
+      <div style="${F}font-size:24px;font-weight:900;color:#fff;letter-spacing:-.5px;">école-francophone.ch</div>
+      <div style="${F}font-size:11px;color:rgba(255,255,255,.75);margin-top:6px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Attestation de niveau de français</div>
+    </div>
+
+    <div style="background:#fff;padding:22px 48px;text-align:center;border-bottom:2px solid #ede9fe;">
+      <div style="${F}font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#9090b0;margin-bottom:5px;">Résultats de</div>
+      <div style="${F}font-size:27px;font-weight:900;color:#1a1a2e;">${p.prenom} ${p.nom}</div>
+      <div style="${F}font-size:12px;color:#7c6faa;margin-top:4px;font-weight:600;">Test effectué le ${p.date_test} à ${p.heure_test}</div>
+    </div>
+
+    <div style="background:#fff;border-bottom:2px solid #ede9fe;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr valign="middle">
+        <td width="176" style="text-align:center;padding:26px 20px;">
+          <div style="width:120px;height:120px;border-radius:50%;background:${GRAD};padding:4px;margin:0 auto;">
+            <div style="width:112px;height:112px;border-radius:50%;background:#fff;padding-top:29px;text-align:center;box-sizing:border-box;">
+              <div style="${F}font-size:33px;font-weight:900;color:#7C3AED;line-height:1;">${p.niveau}</div>
+              <div style="${F}font-size:10px;color:#9090b0;font-weight:700;margin-top:3px;">CECRL</div>
+            </div>
+          </div>
+          <div style="${F}font-size:10px;font-weight:700;color:#9090b0;margin-top:8px;text-transform:uppercase;letter-spacing:.06em;">Niveau estimé</div>
+        </td>
+        <td style="padding:26px 32px 26px 8px;">
+          <div style="${F}font-size:40px;font-weight:900;color:#7C3AED;line-height:1;margin-bottom:4px;">${scoreBar}%</div>
+          <div style="${F}font-size:13px;font-weight:700;color:#4a4a6a;margin-bottom:10px;">${p.bonnes} / ${p.total} bonnes réponses &nbsp;·&nbsp; ${p.duree}</div>
+          <div style="height:8px;background:#ede9fe;border-radius:99px;overflow:hidden;margin-bottom:12px;">
+            <div style="height:100%;width:${scoreBar}%;background:${GRAD};border-radius:99px;"></div>
+          </div>
+          <div style="border-left:3px solid #7C3AED;background:#f5f3ff;border-radius:0 8px 8px 0;padding:9px 14px;">
+            <div style="${F}font-size:12px;color:#4a4a6a;font-style:italic;line-height:1.5;">${p.desc_niveau}</div>
+          </div>
+        </td>
+      </tr></table>
+    </div>
+
+    <div style="background:#fff;border-bottom:2px solid #ede9fe;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr valign="top">
+        <td style="padding:22px 20px 22px 48px;border-right:2px solid #ede9fe;">
+          <div style="${F}font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#1D4ED8;margin-bottom:14px;">📊 Profil de compétences</div>
+          ${compBar("Grammaire",   "📐", cp, "#1D4ED8")}
+          ${compBar("Conjugaison", "🔄", cc, "#7C3AED")}
+          ${compBar("Oral",        "🎧", co, "#0ea5e9")}
+          ${compBar("Écrit",       "📖", ce, "#10b981")}
+          ${compBar("Vocabulaire", "📚", cv, "#f59e0b")}
+        </td>
+        <td style="padding:22px 48px 22px 20px;">
+          <div style="${F}font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#1D4ED8;margin-bottom:14px;">📈 Résultats par niveau CECRL</div>
+          ${nivBar("Pré-A1", na, "#9090b0")}
+          ${nivBar("A1",     n1, "#7C3AED")}
+          ${nivBar("A2",     n2, "#0ea5e9")}
+          ${nivBar("B1",     nb, "#f0a030")}
+          ${nivBar("B2",     nc, "#A855F7")}
+          ${nivBar("C1",     nd, "#f43f5e")}
+        </td>
+      </tr></table>
+    </div>
+
+    <div style="background:#fff;padding:20px 48px;border-bottom:2px solid #ede9fe;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr valign="top">
+        <td style="padding-right:10px;">
+          <div style="background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:10px;padding:14px 16px;">
+            <div style="${F}font-size:10px;font-weight:900;color:#059669;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">✅ Points forts</div>
+            <div style="${F}font-size:12px;color:#064e3b;font-weight:700;line-height:1.6;">${p.points_forts || "—"}</div>
+          </div>
+        </td>
+        <td style="padding-left:10px;">
+          <div style="background:#fff7ed;border:1.5px solid #fcd34d;border-radius:10px;padding:14px 16px;">
+            <div style="${F}font-size:10px;font-weight:900;color:#d97706;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;">📌 À renforcer</div>
+            <div style="${F}font-size:12px;color:#78350f;font-weight:700;line-height:1.6;">${p.points_faibles || "Aucune faiblesse détectée"}</div>
+          </div>
+        </td>
+      </tr></table>
+    </div>
+
+    <div style="background:${GRAD};padding:16px 48px;text-align:center;">
+      <div style="${F}font-size:11px;color:rgba(255,255,255,.8);font-weight:600;letter-spacing:.02em;">école-francophone.ch · learning progress · ${p.date_test}</div>
+    </div>
+
+  </div>`;
 }
 
 function envoyerEmailTest() {
