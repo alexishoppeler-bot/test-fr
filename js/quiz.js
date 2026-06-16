@@ -105,20 +105,23 @@ function affQuestion() {
         </div>`;
       break;
 
-    case "trous":
-      html += `<p style="line-height:2.4;font-size:.95rem" id="para-trous">`;
+    case "trous": {
+      html += `<p class="para-trous" id="para-trous">`;
+      let trouIdx = 0;
       q.segments.forEach(seg => {
         if (seg.t !== undefined) {
           html += seg.t.replace(/\n/g,"<br>");
         } else {
-          html += `<span class="isel"><select id="${seg.id}">
-            <option value="">—</option>
+          html += `<span class="isel" style="--opt-i:${trouIdx}"><select id="${seg.id}" onchange="marquerTrou(this)">
+            <option value="">···</option>
             ${seg.opts.map(o => `<option value="${o}">${o}</option>`).join("")}
           </select></span>`;
+          trouIdx++;
         }
       });
       html += `</p>`;
       break;
+    }
 
     case "demele":
       const melange = [...q.mots].sort(() => Math.random() - .5);
@@ -206,6 +209,9 @@ function selCheck(i, el) {
 function selVF(val) {
   document.querySelectorAll(".vf-btn").forEach(b => b.classList.remove("sel"));
   document.getElementById("vf_" + val).classList.add("sel");
+}
+function marquerTrou(sel) {
+  sel.closest(".isel").classList.toggle("isel--rempli", sel.value !== "");
 }
 
 /* ── LIRE LA RÉPONSE ── */

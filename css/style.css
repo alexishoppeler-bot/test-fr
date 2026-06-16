@@ -183,17 +183,69 @@ body {
 .vf-btn:hover { border-color:var(--accent2); background:var(--bg2) }
 .vf-btn.sel   { border-color:var(--accent2); background:rgba(124,58,237,.08); color:var(--accent2) }
 
-/* ── DROPDOWN INLINE ── */
-.isel { display:inline-block; vertical-align:middle; margin:0 3px }
-.isel select {
-  border: 1.5px solid var(--accent2);
-  border-radius: var(--r-sm);
-  padding: 4px 10px;
-  font-size: .92rem; font-family: var(--font); font-weight: 700;
-  background: var(--surface); color: var(--text);
-  cursor: pointer; outline: none;
+/* ── MOTS À TROUS ── */
+.para-trous {
+  line-height: 3;
+  font-size: .97rem;
+  background: var(--bg2);
+  border-left: 4px solid var(--accent3);
+  border-radius: 0 var(--r-lg) var(--r-lg) 0;
+  padding: 18px 22px;
+  color: var(--text);
+  margin-bottom: 6px;
 }
-.isel select:focus { box-shadow: 0 0 0 3px rgba(124,58,237,.18) }
+.isel {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 4px;
+  position: relative;
+  animation: opt-in .32s ease both;
+  animation-delay: calc(var(--opt-i, 0) * 100ms);
+}
+.isel::after {
+  content: '▾';
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--border);
+  pointer-events: none;
+  font-size: .72rem;
+  font-weight: 900;
+  transition: color .2s, transform .22s cubic-bezier(.34,1.56,.64,1);
+}
+.isel:focus-within::after {
+  transform: translateY(-50%) rotate(180deg);
+  color: var(--accent2);
+}
+.isel select {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 2px dashed var(--border);
+  border-radius: var(--r-md);
+  padding: 4px 28px 4px 12px;
+  font-size: .92rem; font-family: var(--font); font-weight: 700;
+  background: var(--surface);
+  color: var(--text3);
+  cursor: pointer; outline: none;
+  min-width: 110px;
+  transition: all .22s cubic-bezier(.34,1.56,.64,1);
+}
+.isel select:focus {
+  border-style: solid;
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.16);
+  color: var(--text);
+  background: var(--surface);
+}
+.isel--rempli select {
+  border-style: solid;
+  border-color: var(--accent2);
+  background: rgba(124,58,237,.09);
+  color: var(--accent2);
+  transform: scale(1.04);
+}
+.isel--rempli::after { color: var(--accent2); }
 
 /* ── SAISIE LIBRE ── */
 .inp-libre {

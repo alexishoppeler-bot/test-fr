@@ -131,8 +131,8 @@ const QUESTIONS = [
     id:"Q10", niveau:"A2", type:"qcm_u",
     instr:"Sélectionnez le mot adéquat pour compléter la phrase.",
     q:"Marc ne fait ___ de sport depuis son accident ; il reste à la maison.",
-    opts:["jamais","toujours","souvent","parfois","Je ne sais pas"],
-    ok:"jamais"
+    opts:["plus","toujours","souvent","parfois","Je ne sais pas"],
+    ok:"plus"
   },
   {
     id:"Q11", niveau:"A2", type:"qcm_u",
