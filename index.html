@@ -156,7 +156,7 @@
       <div class="form-grp" style="flex-direction:row;align-items:flex-start;gap:10px;margin-top:12px;background:#f5f3ff;border-radius:10px;padding:14px 16px;border:1px solid #ddd6fe">
         <input type="checkbox" id="reg-rgpd" style="width:18px;height:18px;accent-color:var(--accent2);cursor:pointer;flex-shrink:0;margin-top:2px">
         <label for="reg-rgpd" style="margin:0;cursor:pointer;font-size:.88rem;color:var(--text2);line-height:1.45">
-          J'ai lu et j'accepte la <a href="/ecole-francophone/politique-confidentialite.html" style="color:var(--accent2);font-weight:700">politique de confidentialité</a>. Mes données personnelles (nom, e-mail, adresse, téléphone) seront transmises à <strong>école-francophone.ch</strong> dans le but de traiter ma demande d'inscription et ne seront pas partagées avec des tiers. *
+          J'ai lu et j'accepte la <button type="button" onclick="ouvrirPolitique()" style="background:none;border:none;padding:0;color:var(--accent2);font-weight:700;font-size:inherit;font-family:inherit;cursor:pointer;text-decoration:underline">politique de confidentialité</button>. Mes données personnelles (nom, e-mail, adresse, téléphone) seront transmises à <strong>école-francophone.ch</strong> dans le but de traiter ma demande d'inscription et ne seront pas partagées avec des tiers. *
         </label>
       </div>
       <div class="form-err" id="err-reg-rgpd" style="margin-top:4px">Vous devez accepter la politique de confidentialité pour continuer.</div>
@@ -211,6 +211,79 @@
   </div>
 
 </div>
+
+<!-- ══ MODAL POLITIQUE DE CONFIDENTIALITÉ ══ -->
+<div id="modal-politique" role="dialog" aria-modal="true" aria-labelledby="modal-politique-titre"
+     style="display:none;position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;padding:16px">
+  <div id="modal-politique-backdrop"
+       onclick="fermerPolitique()"
+       style="position:absolute;inset:0;background:rgba(15,10,40,.55);backdrop-filter:blur(4px)"></div>
+  <div style="position:relative;background:#fff;border-radius:20px;box-shadow:0 24px 80px rgba(124,58,237,.28);max-width:640px;width:100%;max-height:82vh;display:flex;flex-direction:column;animation:card-in .32s cubic-bezier(.22,1,.36,1) both">
+    <!-- En-tête -->
+    <div style="padding:24px 28px 16px;border-bottom:1px solid #ede9fe;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div id="modal-politique-titre" style="font-size:1.15rem;font-weight:900;color:#1a1a2e">Politique de confidentialité</div>
+        <div style="font-size:.8rem;color:#7C3AED;font-weight:700;margin-top:2px">école-francophone.ch</div>
+      </div>
+      <button onclick="fermerPolitique()" aria-label="Fermer"
+              style="width:36px;height:36px;border-radius:50%;border:none;background:#f5f3ff;cursor:pointer;font-size:1.1rem;color:#7C3AED;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s"
+              onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='#f5f3ff'">✕</button>
+    </div>
+    <!-- Contenu scrollable -->
+    <div style="padding:24px 28px;overflow-y:auto;font-size:.9rem;line-height:1.75;color:#4a4a6a">
+
+      <p style="margin-bottom:16px"><strong style="color:#1a1a2e">Responsable du traitement :</strong><br>
+      École Francophone — école-francophone.ch<br>
+      Contact : <a href="mailto:ecole.francophone@icloud.com" style="color:#7C3AED">ecole.francophone@icloud.com</a></p>
+
+      <p style="margin-bottom:8px;font-weight:800;color:#1a1a2e;font-size:.92rem">Données collectées</p>
+      <p style="margin-bottom:16px">Dans le cadre de ce test de niveau, nous collectons : prénom, nom, adresse e-mail, adresse postale et numéro de téléphone.</p>
+
+      <p style="margin-bottom:8px;font-weight:800;color:#1a1a2e;font-size:.92rem">Finalité du traitement</p>
+      <p style="margin-bottom:16px">Ces informations sont utilisées exclusivement pour :</p>
+      <ul style="margin:0 0 16px 20px">
+        <li>vous transmettre vos résultats de test par e-mail ;</li>
+        <li>traiter une éventuelle demande d'inscription à nos cours ;</li>
+        <li>vous contacter si nécessaire au sujet de votre dossier.</li>
+      </ul>
+
+      <p style="margin-bottom:8px;font-weight:800;color:#1a1a2e;font-size:.92rem">Partage des données</p>
+      <p style="margin-bottom:16px">Vos données <strong>ne sont pas transmises à des tiers</strong>. Elles sont traitées uniquement par l'équipe d'école-francophone.ch.</p>
+
+      <p style="margin-bottom:8px;font-weight:800;color:#1a1a2e;font-size:.92rem">Durée de conservation</p>
+      <p style="margin-bottom:16px">Vos données sont conservées pendant une durée maximale de 2 ans à compter de votre test, puis supprimées.</p>
+
+      <p style="margin-bottom:8px;font-weight:800;color:#1a1a2e;font-size:.92rem">Vos droits</p>
+      <p style="margin-bottom:4px">Conformément au RGPD, vous disposez à tout moment d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ces droits, contactez-nous à :</p>
+      <p style="margin-bottom:16px"><a href="mailto:ecole.francophone@icloud.com" style="color:#7C3AED;font-weight:700">ecole.francophone@icloud.com</a></p>
+
+      <p style="font-size:.78rem;color:#9090b0">Cette politique peut être mise à jour. La version en vigueur est celle présentée lors de votre test.</p>
+    </div>
+    <!-- Pied -->
+    <div style="padding:16px 28px 24px;border-top:1px solid #ede9fe;flex-shrink:0;display:flex;gap:10px">
+      <button onclick="fermerPolitique()" style="flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#1D4ED8,#7C3AED);color:#fff;font-weight:800;font-size:.95rem;font-family:inherit;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+        J'ai compris ✓
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function ouvrirPolitique() {
+  const m = document.getElementById("modal-politique");
+  m.style.display = "flex";
+  document.body.style.overflow = "hidden";
+  m.querySelector("[role='dialog'] > div:nth-child(2), div[style*='overflow-y']");
+  setTimeout(() => m.querySelector("button[aria-label='Fermer']").focus(), 50);
+}
+function fermerPolitique() {
+  document.getElementById("modal-politique").style.display = "none";
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") fermerPolitique();
+});
+</script>
 
 <script src="js/data.js"></script>
 <script src="js/quiz.js"></script>
