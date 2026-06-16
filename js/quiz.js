@@ -520,26 +520,29 @@ function _getRegData() {
 
 /* ── EMAIL ── */
 function _envoyerEmail(params, msgEl) {
-  console.log("📧 EmailParams envoyés :", JSON.stringify(params, null, 2));
+  console.log("📧 EmailJS → service:", window._emailjs?.serviceId, "template:", window._emailjs?.templateId);
+  console.log("📧 Params:", JSON.stringify(params, null, 2));
   if (msgEl) { msgEl.textContent = "Envoi de l'e-mail…"; msgEl.style.color = ""; }
-  try {
-    const ej = window._emailjs;
-    if (!ej || typeof emailjs === "undefined") {
-      if (msgEl) { msgEl.textContent = "✓ Résultats enregistrés (email non configuré)."; msgEl.style.color = "var(--warning)"; }
-      return;
-    }
-    emailjs.send(ej.serviceId, ej.templateId, { ...params, to_email: "ecole.francophone@icloud.com" })
-      .then(() => {
-        if (msgEl) { msgEl.textContent = "✓ Résultats envoyés !"; msgEl.style.color = "var(--success)"; }
-      })
-      .catch(err => {
-        console.error("EmailJS erreur:", err);
-        if (msgEl) { msgEl.textContent = "Erreur email : " + (err.text || err); msgEl.style.color = "var(--danger)"; }
-      });
-  } catch(e) {
-    console.error("EmailJS exception:", e);
-    if (msgEl) { msgEl.textContent = "Erreur : " + e.message; msgEl.style.color = "var(--danger)"; }
+
+  const ej = window._emailjs;
+  if (!ej || typeof emailjs === "undefined") {
+    if (msgEl) { msgEl.textContent = "⚠ EmailJS non chargé."; msgEl.style.color = "var(--warning)"; }
+    return Promise.reject("EmailJS non chargé");
   }
+
+  return emailjs.send(ej.serviceId, ej.templateId, { ...params, to_email: "ecole.francophone@icloud.com" })
+    .then(() => {
+      if (msgEl) { msgEl.textContent = "✓ Résultats envoyés !"; msgEl.style.color = "var(--success)"; }
+    })
+    .catch(err => {
+      const detail = err?.text || err?.message || JSON.stringify(err);
+      console.error("❌ EmailJS erreur:", err);
+      if (msgEl) {
+        msgEl.textContent = "✗ Erreur : " + detail;
+        msgEl.style.color = "var(--danger)";
+      }
+      throw err;
+    });
 }
 
 function envoyerEmailConfirm() {
@@ -547,7 +550,13 @@ function envoyerEmailConfirm() {
   const btn = document.getElementById("btn-confirm-email");
   const msg = document.getElementById("save-msg");
   if (btn) { btn.disabled = true; btn.textContent = "Envoi en cours…"; }
-  _envoyerEmail(_lastEmailParams, msg);
+  _envoyerEmail(_lastEmailParams, msg)
+    .then(() => {
+      if (btn) { btn.textContent = "✓ Envoyé !"; }
+    })
+    .catch(() => {
+      if (btn) { btn.disabled = false; btn.textContent = "Réessayer →"; }
+    });
 }
 
 function telechargerImage() {
