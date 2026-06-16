@@ -42,6 +42,10 @@ function demarrer() {
 }
 
 /* ── AFFICHER UNE QUESTION ── */
+function fmtQ(t) {
+  return (t || "").replace(/_{2,}/g, '<span class="q-blank"></span>');
+}
+
 function affQuestion() {
   const q = QUESTIONS[qIdx];
   const num = qIdx + 1;
@@ -75,9 +79,10 @@ function affQuestion() {
 
   switch(q.type) {
     case "qcm_u":
-      html += `<span class="q-label">${q.q}</span><div class="opts-radio">`;
+      html += `<span class="q-label">${fmtQ(q.q)}</span><div class="opts-radio">`;
       q.opts.forEach((o, i) => {
         const cls = (o === "Je ne sais pas") ? "opt-radio opt-jnsp" : "opt-radio";
+        if (o === "Je ne sais pas") html += '<div class="opts-sep"></div>';
         html += `<label class="${cls}" id="opt${i}" style="--opt-i:${i}">
           <input type="radio" name="qcm" value="${o}" onchange="selRadio(${i})"> ${o}
         </label>`;
@@ -86,14 +91,15 @@ function affQuestion() {
       break;
 
     case "qcm_m":
-      html += `<span class="q-label">${q.q}</span>
+      html += `<span class="q-label">${fmtQ(q.q)}</span>
         <p class="note-saisie">Plusieurs réponses possibles.</p>
         <div class="opts-check">`;
-      q.opts.forEach((o, i) =>
+      q.opts.forEach((o, i) => {
+        if (o === "Je ne sais pas") html += '<div class="opts-sep"></div>';
         html += `<label class="opt-check" id="opt${i}" style="--opt-i:${i}">
           <input type="checkbox" value="${o}" onchange="selCheck(${i},this)"> ${o}
-        </label>`
-      );
+        </label>`;
+      });
       html += `</div>`;
       break;
 
