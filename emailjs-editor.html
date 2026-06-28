@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EmailJS Editor — école-francophone</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0 }
+:root {
+  --bg:       #0d0c1a;
+  --surface:  #14132a;
+  --surface2: #1c1b33;
+  --border:   #2a2848;
+  --text:     #e2e0f0;
+  --text2:    #7a78a8;
+  --accent:   #7C3AED;
+  --accent2:  #A855F7;
+  --blue:     #1D4ED8;
+  --green:    #10b981;
+  --red:      #f43f5e;
+  --yellow:   #f59e0b;
+  --mono: 'Fira Code','Cascadia Code','Consolas','Courier New',monospace;
+  --sans: 'Nunito','Segoe UI',Arial,sans-serif;
+}
+html,body { height:100%; overflow:hidden; }
+body { font-family:var(--sans); background:var(--bg); color:var(--text); display:flex; flex-direction:column; }
+
+/* ─── TOP BAR ─── */
+.bar {
+  height:50px; flex-shrink:0;
+  background:linear-gradient(135deg,#1e3a8a 0%,#1D4ED8 40%,#7C3AED 100%);
+  display:flex; align-items:center; padding:0 18px; gap:10px;
+  box-shadow:0 2px 20px rgba(124,58,237,.45);
+}
+.bar-title { font-weight:900; font-size:.92rem; color:#fff; display:flex; align-items:center; gap:8px; }
+.bar-title span { font-size:.7rem; background:rgba(255,255,255,.18); color:rgba(255,255,255,.85); padding:2px 8px; border-radius:99px; font-weight:700; }
+.bar-sep { width:1px; height:24px; background:rgba(255,255,255,.2); margin:0 4px; }
+.bar-sp  { flex:1; }
+.btn {
+  height:30px; padding:0 13px; border-radius:7px; border:none;
+  font-size:.78rem; font-weight:800; cursor:pointer; display:flex;
+  align-items:center; gap:5px; font-family:var(--sans); transition:all .15s;
+  white-space:nowrap;
+}
+.btn-ghost  { background:rgba(255,255,255,.12); color:#fff; }
+.btn-ghost:hover  { background:rgba(255,255,255,.24); }
+.btn-white  { background:#fff; color:#7C3AED; }
+.btn-white:hover  { background:#ede9fe; }
+.btn-green  { background:#10b981; color:#fff; }
+.btn-green:hover  { background:#059669; }
+.btn-red    { background:rgba(244,63,94,.15); color:#f43f5e; border:1px solid rgba(244,63,94,.3); }
+.btn-red:hover    { background:rgba(244,63,94,.28); }
+.btn:disabled { opacity:.45; cursor:not-allowed; }
+
+/* ─── CONFIG PANEL ─── */
+.cfg {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:12px 18px; display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap;
+  flex-shrink:0; transition:all .2s;
+}
+.cfg.hide { display:none; }
+.cfg-f { display:flex; flex-direction:column; gap:3px; flex:1; min-width:150px; }
+.cfg-f label { font-size:.68rem; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; }
+.cfg-f input {
+  background:var(--surface2); border:1px solid var(--border); border-radius:6px;
+  padding:6px 10px; font-size:.8rem; font-family:var(--mono); color:var(--text);
+  outline:none; transition:border-color .15s;
+}
+.cfg-f input:focus { border-color:var(--accent); }
+.cfg-divider { width:1px; height:34px; background:var(--border); }
+
+/* ─── TABS ─── */
+.tabs { display:flex; background:var(--surface); border-bottom:1px solid var(--border); padding:0 18px; gap:2px; flex-shrink:0; }
+.tab  { padding:9px 15px; font-size:.79rem; font-weight:800; color:var(--text2); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; }
+.tab:hover  { color:var(--text); }
+.tab.on     { color:var(--accent2); border-bottom-color:var(--accent2); }
+
+/* ─── MAIN ─── */
+.main { flex:1; display:flex; overflow:hidden; }
+
+/* ─── EDITOR ─── */
+.ed-pane { width:50%; display:flex; flex-direction:column; border-right:1px solid var(--border); overflow:hidden; }
+.ed-toolbar {
+  background:var(--surface2); border-bottom:1px solid var(--border); padding:7px 13px;
+  display:flex; align-items:center; gap:8px; flex-shrink:0; font-size:.75rem; color:var(--text2);
+}
+.lang-badge { background:rgba(124,58,237,.25); color:var(--accent2); padding:2px 7px; border-radius:4px; font-weight:800; font-size:.68rem; }
+.ed-body { flex:1; display:flex; overflow:hidden; }
+.line-nums {
+  width:42px; flex-shrink:0; background:var(--surface2); border-right:1px solid var(--border);
+  padding:12px 6px 12px 0; font-family:var(--mono); font-size:.76rem; line-height:1.58;
+  color:#3a3860; text-align:right; overflow:hidden; user-select:none;
+}
+.line-nums span { display:block; }
+#editor {
+  flex:1; background:var(--bg); color:#c0bde8; border:none; outline:none;
+  padding:12px 14px; font-family:var(--mono); font-size:.76rem; line-height:1.58;
+  resize:none; overflow-y:auto; tab-size:2; white-space:pre;
+  scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+}
+#editor::-webkit-scrollbar { width:5px; }
+#editor::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+/* ─── DATA PANEL ─── */
+.data-pane {
+  width:50%; display:none; flex-direction:column;
+  border-right:1px solid var(--border); overflow:hidden;
+}
+.data-pane.on { display:flex; }
+.data-scroll { flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-wrap:wrap; gap:10px; align-content:flex-start; }
+.data-scroll::-webkit-scrollbar { width:5px; }
+.data-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+.df { display:flex; flex-direction:column; gap:3px; flex:1; min-width:170px; }
+.df label { font-size:.68rem; font-weight:800; color:var(--accent2); font-family:var(--mono); }
+.df input {
+  background:var(--surface2); border:1px solid var(--border); border-radius:6px;
+  padding:6px 10px; font-size:.8rem; color:var(--text); outline:none;
+  font-family:var(--sans); transition:border-color .15s;
+}
+.df input:focus { border-color:var(--accent); }
+.data-section { width:100%; font-size:.7rem; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; padding:6px 0 2px; border-top:1px solid var(--border); margin-top:4px; }
+.data-section:first-child { border-top:none; margin-top:0; }
+
+/* ─── PREVIEW ─── */
+.prev-pane { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.prev-toolbar {
+  background:var(--surface2); border-bottom:1px solid var(--border); padding:7px 13px;
+  display:flex; align-items:center; gap:8px; flex-shrink:0; font-size:.75rem; color:var(--text2);
+}
+#preview { flex:1; border:none; background:#f5f3ff; }
+
+/* ─── STATUS BAR ─── */
+.status {
+  height:24px; flex-shrink:0;
+  background:var(--accent); display:flex; align-items:center;
+  padding:0 16px; gap:20px; font-size:.7rem; color:rgba(255,255,255,.75); font-weight:700;
+}
+.status-dot { width:6px; height:6px; border-radius:50%; background:#10b981; display:inline-block; margin-right:4px; }
+
+/* ─── TOAST ─── */
+#toast {
+  position:fixed; bottom:36px; left:50%; transform:translateX(-50%) translateY(12px);
+  background:var(--surface2); border:1px solid var(--border); color:var(--text);
+  padding:9px 20px; border-radius:10px; font-size:.83rem; font-weight:700;
+  box-shadow:0 8px 32px rgba(0,0,0,.5); opacity:0; transition:all .28s;
+  pointer-events:none; z-index:9999; white-space:nowrap;
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="bar">
+  <div class="bar-title">📧 EmailJS Editor <span>école-francophone</span></div>
+  <div class="bar-sep"></div>
+  <button class="btn btn-ghost" onclick="toggleCfg()">⚙ Config</button>
+  <button class="btn btn-ghost" onclick="resetTemplate()">↺ Recharger</button>
+  <div class="bar-sp"></div>
+  <button class="btn btn-ghost" onclick="copyHTML()">⎘ Copier</button>
+  <button class="btn btn-ghost" onclick="downloadHTML()">⬇ .html</button>
+  <div class="bar-sep"></div>
+  <button class="btn btn-green" id="btn-send" onclick="sendTest()">▶ Envoyer test</button>
+</div>
+
+<!-- CONFIG -->
+<div class="cfg hide" id="cfg">
+  <div class="cfg-f">
+    <label>Public Key</label>
+    <input id="c-key"      placeholder="70v8ZeP93IYYMA6FO">
+  </div>
+  <div class="cfg-f">
+    <label>Service ID</label>
+    <input id="c-service"  placeholder="service_6zurkie">
+  </div>
+  <div class="cfg-f">
+    <label>Template ID</label>
+    <input id="c-template" placeholder="iwqiphl">
+  </div>
+  <div class="cfg-divider"></div>
+  <div class="cfg-f">
+    <label>E-mail de test</label>
+    <input id="c-email" type="email" placeholder="vous@exemple.com">
+  </div>
+  <button class="btn btn-white" onclick="saveCfg()">Enregistrer</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab on"  id="tab-ed"   onclick="setTab('ed')">✏ Éditeur HTML</div>
+  <div class="tab"     id="tab-data" onclick="setTab('data')">🗂 Données test</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- EDITOR -->
+  <div class="ed-pane" id="ed-pane">
+    <div class="ed-toolbar">
+      <span class="lang-badge">HTML</span>
+      <span>emailjs_template.html</span>
+      <span style="flex:1"></span>
+      <span id="lbl-lines">—</span>
+    </div>
+    <div class="ed-body">
+      <div class="line-nums" id="lnums"></div>
+      <textarea id="editor" spellcheck="false" autocomplete="off"></textarea>
+    </div>
+  </div>
+
+  <!-- DATA -->
+  <div class="data-pane" id="data-pane">
+    <div class="ed-toolbar">
+      <span class="lang-badge">JSON</span>
+      <span>Données de prévisualisation</span>
+      <span style="flex:1"></span>
+      <button class="btn btn-red" style="height:24px;font-size:.7rem" onclick="resetData()">↺ Reset</button>
+    </div>
+    <div class="data-scroll" id="data-scroll"></div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="prev-pane">
+    <div class="prev-toolbar">
+      👁 Aperçu en direct
+      <span style="flex:1"></span>
+      <span id="lbl-vars" style="color:var(--accent2);font-weight:800"></span>
+    </div>
+    <iframe id="preview" sandbox="allow-same-origin"></iframe>
+  </div>
+
+</div>
+
+<!-- STATUS -->
+<div class="status">
+  <span><span class="status-dot"></span>Prêt</span>
+  <span id="st-chars">0 caractères</span>
+  <span id="st-vars">0 variables</span>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ══ CONFIG ══ */
+const DEF_CFG = { key:"70v8ZeP93IYYMA6FO", service:"service_6zurkie", template:"iwqiphl", email:"alexis.hoppeler@gmail.com" };
+let cfg = { ...DEF_CFG };
+
+function loadCfg() {
+  try { cfg = { ...DEF_CFG, ...JSON.parse(localStorage.getItem("ejs_cfg")||"{}") }; } catch(e) {}
+  document.getElementById("c-key").value      = cfg.key;
+  document.getElementById("c-service").value  = cfg.service;
+  document.getElementById("c-template").value = cfg.template;
+  document.getElementById("c-email").value    = cfg.email;
+}
+function saveCfg() {
+  cfg.key      = document.getElementById("c-key").value.trim()      || DEF_CFG.key;
+  cfg.service  = document.getElementById("c-service").value.trim()  || DEF_CFG.service;
+  cfg.template = document.getElementById("c-template").value.trim() || DEF_CFG.template;
+  cfg.email    = document.getElementById("c-email").value.trim()    || DEF_CFG.email;
+  localStorage.setItem("ejs_cfg", JSON.stringify(cfg));
+  toast("✓ Config enregistrée", "#10b981");
+}
+function toggleCfg() {
+  document.getElementById("cfg").classList.toggle("hide");
+}
+loadCfg();
+
+/* ══ DONNÉES TEST ══ */
+const DEF_DATA = {
+  _section_identite: "Identité",
+  prenom:           "Marie",
+  nom:              "Dupont",
+  email:            "marie.dupont@example.com",
+  adresse:          "12 rue des Alpes",
+  npa:              "1200",
+  ville:            "Genève",
+  telephone:        "+41 79 123 45 67",
+  _section_resultat: "Résultat",
+  niveau:           "B1",
+  score:            "67",
+  bonnes:           "20",
+  total:            "30",
+  duree:            "14m 32s",
+  desc_niveau:      "Vous vous débrouillez dans la plupart des situations courantes.",
+  date_test:        new Date().toLocaleDateString("fr-CH",{day:"2-digit",month:"2-digit",year:"numeric"}),
+  heure_test:       new Date().toLocaleTimeString("fr-CH",{hour:"2-digit",minute:"2-digit"}),
+  _section_comp: "Compétences",
+  comp_grammaire:   "72%",
+  comp_conjugaison: "58%",
+  comp_oral:        "80%",
+  comp_ecrit:       "65%",
+  comp_vocabulaire: "70%",
+  _section_cecrl: "Niveaux CECRL",
+  niv_prea1: "100%",
+  niv_a1:    "83%",
+  niv_a2:    "67%",
+  niv_b1:    "55%",
+  niv_b2:    "30%",
+  niv_c1:    "12%",
+  _section_analyse: "Analyse",
+  points_forts:   "🎧 Oral (80%), 📐 Grammaire (72%)",
+  points_faibles: "🔄 Conjugaison (58%)"
+};
+
+let data = {};
+function resetData() { data = getDefaultData(); buildDataPanel(); updatePreview(); }
+function getDefaultData() {
+  const d = {};
+  Object.entries(DEF_DATA).forEach(([k,v]) => { if (!k.startsWith("_")) d[k] = v; });
+  return d;
+}
+
+/* ── BUILD DATA PANEL ── */
+function buildDataPanel() {
+  const wrap = document.getElementById("data-scroll");
+  wrap.innerHTML = "";
+  Object.entries(DEF_DATA).forEach(([k, v]) => {
+    if (k.startsWith("_section_")) {
+      const s = document.createElement("div");
+      s.className = "data-section";
+      s.textContent = v;
+      wrap.appendChild(s);
+      return;
+    }
+    const div = document.createElement("div");
+    div.className = "df";
+    div.innerHTML = `<label>{{${esc(k)}}}</label><input id="d-${esc(k)}" value="${esc(String(data[k]||""))}" oninput="data['${k}']=this.value;updatePreview()">`;
+    wrap.appendChild(div);
+  });
+}
+function esc(s) { return String(s).replace(/"/g,"&quot;").replace(/'/g,"\\'").replace(/</g,"&lt;"); }
+
+data = getDefaultData();
+buildDataPanel();
+
+/* ══ ÉDITEUR ══ */
+const editor  = document.getElementById("editor");
+const preview = document.getElementById("preview");
+const lnums   = document.getElementById("lnums");
+let tmr;
+
+editor.addEventListener("input", () => {
+  updateLineNumbers();
+  clearTimeout(tmr);
+  tmr = setTimeout(updatePreview, 300);
+  updateStatus();
+});
+editor.addEventListener("scroll", () => { lnums.scrollTop = editor.scrollTop; });
+editor.addEventListener("keydown", e => {
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const s = editor.selectionStart, end = editor.selectionEnd;
+    editor.value = editor.value.slice(0,s) + "  " + editor.value.slice(end);
+    editor.selectionStart = editor.selectionEnd = s + 2;
+    updateLineNumbers();
+  }
+  if ((e.ctrlKey||e.metaKey) && e.key === "s") { e.preventDefault(); downloadHTML(); }
+});
+
+function updateLineNumbers() {
+  const n = editor.value.split("\n").length;
+  document.getElementById("lbl-lines").textContent = n + " lignes";
+  lnums.innerHTML = Array.from({length:n},(_,i)=>`<span>${i+1}</span>`).join("");
+  lnums.scrollTop = editor.scrollTop;
+}
+
+function updateStatus() {
+  const vars = [...new Set((editor.value.match(/\{\{[^}]+\}\}/g)||[]).map(v=>v.slice(2,-2)))];
+  document.getElementById("st-chars").textContent = editor.value.length + " car.";
+  document.getElementById("st-vars").textContent  = vars.length + " variables";
+  document.getElementById("lbl-vars").textContent = vars.length + " variables";
+}
+
+function updatePreview() {
+  let html = editor.value;
+  Object.entries(data).forEach(([k,v]) => {
+    html = html.split("{{"+k+"}}").join(v);
+  });
+  preview.srcdoc = html;
+  updateStatus();
+}
+
+/* ── CHARGER TEMPLATE ── */
+function resetTemplate() {
+  fetch("emailjs_template.html?t=" + Date.now())
+    .then(r => r.text())
+    .then(html => { editor.value = html; updateLineNumbers(); updatePreview(); })
+    .catch(() => toast("✗ Impossible de charger le fichier", "#f43f5e"));
+}
+resetTemplate();
+
+/* ══ TABS ══ */
+function setTab(t) {
+  document.getElementById("tab-ed").classList.toggle("on",   t==="ed");
+  document.getElementById("tab-data").classList.toggle("on", t==="data");
+  document.getElementById("ed-pane").style.display   = t==="ed"   ? "flex" : "none";
+  document.getElementById("data-pane").classList.toggle("on", t==="data");
+}
+
+/* ══ ACTIONS ══ */
+function copyHTML() {
+  navigator.clipboard.writeText(editor.value)
+    .then(()  => toast("✓ HTML copié", "#10b981"))
+    .catch(()  => toast("✗ Copie impossible", "#f43f5e"));
+}
+function downloadHTML() {
+  const a = document.createElement("a");
+  a.href = "data:text/html;charset=utf-8," + encodeURIComponent(editor.value);
+  a.download = "emailjs_template.html";
+  a.click();
+  toast("⬇ Téléchargement démarré", "#A855F7");
+}
+
+/* ── ENVOYER TEST ── */
+function sendTest() {
+  const btn = document.getElementById("btn-send");
+  btn.disabled = true; btn.textContent = "Envoi…";
+  emailjs.init({ publicKey: cfg.key });
+  const params = { ...data, to_email: cfg.email };
+  emailjs.send(cfg.service, cfg.template, params)
+    .then(() => {
+      toast("✓ E-mail envoyé à " + cfg.email, "#10b981");
+      btn.textContent = "✓ Envoyé !";
+    })
+    .catch(err => {
+      toast("✗ " + (err.text || String(err)), "#f43f5e");
+      btn.textContent = "✗ Erreur";
+    })
+    .finally(() => setTimeout(() => { btn.textContent = "▶ Envoyer test"; btn.disabled = false; }, 3000));
+}
+
+/* ══ TOAST ══ */
+let toastTmr;
+function toast(msg, color) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.color = color || "var(--text)";
+  t.style.borderColor = color || "var(--border)";
+  t.classList.add("show");
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => t.classList.remove("show"), 3200);
+}
+</script>
+</body>
+</html>
